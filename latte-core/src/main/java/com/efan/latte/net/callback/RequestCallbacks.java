@@ -2,8 +2,8 @@ package com.efan.latte.net.callback;
 
 import android.os.Handler;
 
-import com.efan.latte.ui.LatteLoader;
-import com.efan.latte.ui.LoaderStyle;
+import com.efan.latte.ui.loader.LatteLoader;
+import com.efan.latte.ui.loader.LoaderStyle;
 
 import retrofit2.Call;
 import retrofit2.Callback;

@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.efan.ec.icon.FontEcModule;
 import com.efan.latte.app.Latte;
+import com.efan.latte.net.Interceptors.DebugInterceptor;
 import com.joanzapata.iconify.fonts.FontAwesomeModule;
 
 /**
@@ -18,6 +19,10 @@ public class ExampleApp extends Application {
                 .withIcon(new FontAwesomeModule())
                 .withIcon(new FontEcModule())
                 .withApiHost("http://127.0.0.1/")
+                .withInterceptor(new DebugInterceptor("index", R.raw.test))
+//                .withWeChatAppId("")
+//                .withWeChatAppSecret("")
                 .configue();
+//        DataBaseManager.getInstance().init(this);
     }
 }

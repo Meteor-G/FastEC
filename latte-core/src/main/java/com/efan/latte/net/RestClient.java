@@ -7,13 +7,17 @@ import com.efan.latte.net.callback.IFailure;
 import com.efan.latte.net.callback.IRequset;
 import com.efan.latte.net.callback.ISuccess;
 import com.efan.latte.net.callback.RequestCallbacks;
-import com.efan.latte.ui.LatteLoader;
-import com.efan.latte.ui.LoaderStyle;
+import com.efan.latte.net.download.DownloadHandler;
+import com.efan.latte.ui.loader.LatteLoader;
+import com.efan.latte.ui.loader.LoaderStyle;
 
+import java.io.File;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import okhttp3.ResponseBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Callback;
 
 /**
@@ -27,24 +31,36 @@ public class RestClient {
     private final String URL;
     private static final WeakHashMap<String, Object> PARAMS = RestCreator.getParams();
     private final IError ERROR;
+    private final String DOWNLOAD_DIR;
+    private final String EXTENSION;
+    private final String NAME;
     private final IFailure FAILURE;
     private final IRequset REQUEST;
     private final ISuccess SUCCESS;
-    private final ResponseBody BOBY;
+    private final RequestBody BOBY;
+    private final File FILE;
     private final LoaderStyle LOADER_STYLE;
     private final Context CONTEXT;
 
+
     public RestClient(String url,
                       Map<String, Object> params,
+                      String downloadDir,
+                      String extension,
+                      String name,
                       IError error,
                       IFailure failure,
                       IRequset requset,
                       ISuccess success,
-                      ResponseBody body,
+                      RequestBody body,
+                      File file,
                       LoaderStyle loaderStyle,
                       Context context) {
         this.URL = url;
         PARAMS.putAll(params);
+        this.DOWNLOAD_DIR = downloadDir;
+        this.EXTENSION = extension;
+        this.NAME = name;
         this.ERROR = error;
         this.FAILURE = failure;
         this.REQUEST = requset;
@@ -52,10 +68,11 @@ public class RestClient {
         this.BOBY = body;
         this.LOADER_STYLE = loaderStyle;
         this.CONTEXT = context;
+        this.FILE = file;
     }
 
-    public static RestClickBuilder builder() {
-        return new RestClickBuilder();
+    public static RestClientBuilder builder() {
+        return new RestClientBuilder();
     }
 
     private void request(HttpMethod method) {
@@ -75,11 +92,24 @@ public class RestClient {
             case POST:
                 call = service.post(URL, PARAMS);
                 break;
+            case POST_RAM:
+                call = service.postRaw(URL, BOBY);
+                break;
             case PUT:
                 call = service.put(URL, PARAMS);
                 break;
+            case PUT_RAM:
+                call = service.putRaw(URL, BOBY);
+                break;
             case DELETE:
                 call = service.delete(URL, PARAMS);
+                break;
+            case UPLOAD:
+                final RequestBody requestBody =
+                        RequestBody.create(MediaType.parse(MultipartBody.FORM.toString()), FILE);
+                final MultipartBody.Part boby =
+                        MultipartBody.Part.createFormData("file", FILE.getName(), requestBody);
+                call = RestCreator.getRestService().upload(URL, boby);
                 break;
             default:
                 break;
@@ -103,14 +133,47 @@ public class RestClient {
     }
 
     public final void post() {
-        request(HttpMethod.POST);
+        if (BOBY == null) {
+            request(HttpMethod.POST);
+        } else {
+            if (!PARAMS.isEmpty()) {
+                throw new RuntimeException("params must be null");
+            }
+            request(HttpMethod.POST_RAM);
+        }
+
     }
 
     public final void put() {
-        request(HttpMethod.PUT);
+        if (BOBY == null) {
+            request(HttpMethod.PUT);
+        } else {
+            if (!PARAMS.isEmpty()) {
+                throw new RuntimeException("params must be null");
+            }
+            request(HttpMethod.PUT_RAM);
+        }
     }
 
     public final void delete() {
         request(HttpMethod.DELETE);
+    }
+
+    //上传
+    public final void upload() {
+        request(HttpMethod.UPLOAD);
+    }
+
+    //下载
+    public final void download() {
+        new DownloadHandler(URL,
+                ERROR,
+                DOWNLOAD_DIR,
+                EXTENSION,
+                NAME,
+                FAILURE,
+                REQUEST,
+                SUCCESS).
+                handledownload();
     }
 }
