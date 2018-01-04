@@ -13,5 +13,7 @@ public enum ConfigKeys {
     //微信
     WE_CHAT_APP_ID,
     WE_CHAT_APP_SECRET,
-    ACTIVITY
+    ACTIVITY,
+
+    HANDLER
 }

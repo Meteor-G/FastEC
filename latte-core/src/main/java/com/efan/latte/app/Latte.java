@@ -2,6 +2,8 @@ package com.efan.latte.app;
 
 import android.content.Context;
 
+import android.os.Handler;
+
 /**
  * Created by Administrator on 2017/11/29.
  * 对外工具类
@@ -27,6 +29,10 @@ public final class Latte {
 
     public static Context getApplication() {
         return getConfigurations(ConfigKeys.APPLICATION_CONTEXT);
+    }
+
+    public static Handler getHandler() {
+        return getConfigurations(ConfigKeys.HANDLER);
     }
 
 //    public static HashMap<Object, Object> getConfigurations() {

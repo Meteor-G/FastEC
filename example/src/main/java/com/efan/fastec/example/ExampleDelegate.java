@@ -2,6 +2,7 @@ package com.efan.fastec.example;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,24 +17,27 @@ import com.efan.latte.net.callback.ISuccess;
  */
 
 public class ExampleDelegate extends LatteDelegate {
+
     @Override
     public Object setLayout() {
         return R.layout.delegate_example;
     }
 
+
     @Override
     public void onBindView(@Nullable Bundle savedInstanceState, View rootView) {
-//        testRestClient();
+        testRestClient();
     }
 
     public void testRestClient() {
         RestClient.builder()
-                .url("https://127.0.0.1/index")
+                .url("index")
                 .loader(getContext())
                 .success(new ISuccess() {
                     @Override
                     public void onSuccess(String response) {
-                        Toast.makeText(getContext(), response, Toast.LENGTH_SHORT).show();
+                        Log.i("info", response);
+                        Toast.makeText(getContext(), response, Toast.LENGTH_LONG).show();
                     }
                 })
                 .error(new IError() {
