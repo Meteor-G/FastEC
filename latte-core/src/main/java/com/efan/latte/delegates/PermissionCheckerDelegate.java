@@ -6,4 +6,5 @@ package com.efan.latte.delegates;
 
 public abstract class PermissionCheckerDelegate extends BaseDelegate {
 
+
 }

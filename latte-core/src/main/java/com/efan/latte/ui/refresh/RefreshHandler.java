@@ -1,15 +1,19 @@
 package com.efan.latte.ui.refresh;
 
+import android.content.res.Resources;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.efan.latte.R;
 import com.efan.latte.app.Latte;
-import com.efan.latte.net.RestClient;
-import com.efan.latte.net.callback.ISuccess;
 import com.efan.latte.ui.recycle.DataConverter;
 import com.efan.latte.ui.recycle.MultipleRecycleAdapter;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by Administrator on 2017/12/19.
@@ -59,25 +63,48 @@ public class RefreshHandler implements SwipeRefreshLayout.OnRefreshListener,
 
     public void firstPage(String url) {
         BEAN.setDelayed(1000);
-        RestClient.builder()
-                .url(url)
-                .success(new ISuccess() {
-                    @Override
-                    public void onSuccess(String response) {
-//                        Toast.makeText(Latte.getApplication(), "请求的数据为" + response, Toast.LENGTH_LONG).show();
-                        final JSONObject object = JSONObject.parseObject(response);
-                        BEAN.setTotal(object.getInteger("total"))
-                                .setPageSize(object.getInteger("page_size"));
-                        //设置Adapter
-                        mAdapter = MultipleRecycleAdapter.create(COUVERTER.setJsonData(response));
+        String response;
+        Resources resources = Latte.getApplication().getResources();
+        InputStream is = null;
+        try {
+            is = resources.openRawResource(R.raw.index_data);
+            byte buffer[] = new byte[is.available()];
+            is.read(buffer);
+            response = new String(buffer);
+            initData(response);
+        } catch (IOException e) {
 
-                        mAdapter.setOnLoadMoreListener(RefreshHandler.this, RECYCLEVIEW);
-                        RECYCLEVIEW.setAdapter(mAdapter);
-                        BEAN.addIndex();
-                    }
-                })
-                .build()
-                .get();
+        }
+//        RestClient.builder()
+//                .url(url)
+//                .success(new ISuccess() {
+//                    @Override
+//                    public void onSuccess(String response) {
+//                        Toast.makeText(Latte.getApplication(), "请求的数据为" + response, Toast.LENGTH_LONG).show();
+//                        final JSONObject object = JSONObject.parseObject(response);
+//                        BEAN.setTotal(object.getInteger("total"))
+//                                .setPageSize(object.getInteger("page_size"));
+//                        //设置Adapter
+//                        mAdapter = MultipleRecycleAdapter.create(COUVERTER.setJsonData(response));
+//                        mAdapter.setOnLoadMoreListener(RefreshHandler.this, RECYCLEVIEW);
+//                        RECYCLEVIEW.setAdapter(mAdapter);
+//                        BEAN.addIndex();
+//                    }
+//                })
+//                .build()
+//                .get();
+    }
+
+    private void initData(String response) {
+        Toast.makeText(Latte.getApplication(), "请求的数据为" + response, Toast.LENGTH_LONG).show();
+        final JSONObject object = JSONObject.parseObject(response);
+        BEAN.setTotal(object.getInteger("total"))
+                .setPageSize(object.getInteger("page_size"));
+        //设置Adapter
+//        mAdapter = MultipleRecycleAdapter.create(COUVERTER.setJsonData(response));
+//        mAdapter.setOnLoadMoreListener(RefreshHandler.this, RECYCLEVIEW);
+//        RECYCLEVIEW.setAdapter(mAdapter);
+//        BEAN.addIndex();
     }
 
     //监听Refresh操作
